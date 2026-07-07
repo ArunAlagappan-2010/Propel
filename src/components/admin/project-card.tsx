@@ -9,6 +9,7 @@ import {
 } from "@/lib/actions/projects";
 import type { ActionResult } from "@/lib/actions/community";
 import { MILESTONE_STAGES, stageLabel } from "@/lib/milestones";
+import { RecordResultDialog } from "@/components/admin/record-result-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -85,14 +86,21 @@ export function ProjectCard({
             {project.school_name ?? "No school set"}
           </p>
         </div>
-        {result && (result.placement || result.final_score !== null) && (
-          <Badge className="gap-1">
-            <Trophy className="size-3" aria-hidden />
-            {result.placement
-              ? `Placed #${result.placement}`
-              : `Score ${result.final_score}`}
-          </Badge>
-        )}
+        <div className="flex items-center gap-2">
+          {result && (result.placement || result.final_score !== null) && (
+            <Badge className="gap-1">
+              <Trophy className="size-3" aria-hidden />
+              {result.placement
+                ? `Placed #${result.placement}`
+                : `Score ${result.final_score}`}
+            </Badge>
+          )}
+          <RecordResultDialog
+            projectId={project.id}
+            projectName={project.name}
+            existing={result ?? null}
+          />
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Milestone tracker */}

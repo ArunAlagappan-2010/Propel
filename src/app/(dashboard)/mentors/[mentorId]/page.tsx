@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { ChevronLeft, MessagesSquare, CalendarDays } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { messageUser } from "@/lib/actions/chat";
+import { BookingEmbed } from "@/components/mentors/booking-embed";
+import { MentorSettings } from "@/components/mentors/mentor-settings";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -23,7 +25,7 @@ export default async function MentorProfilePage({
   const { data: mentor } = await supabase
     .from("profiles")
     .select(
-      "id, full_name, bio, avatar_url, timezone, mentor_profile_categories(category:community_categories(id, name, slug))"
+      "id, full_name, bio, avatar_url, timezone, cal_com_username, mentor_profile_categories(category:community_categories(id, name, slug))"
     )
     .eq("id", mentorId)
     .eq("role", "mentor")
@@ -38,6 +40,18 @@ export default async function MentorProfilePage({
       .join("") || "M";
 
   const isSelf = user?.id === mentor.id;
+
+  const tags = (mentor.mentor_profile_categories ?? [])
+    .map((t) => (Array.isArray(t.category) ? t.category[0] : t.category))
+    .filter((c): c is { id: string; name: string; slug: string } => !!c);
+
+  // Categories list only needed for the self-serve settings panel.
+  const { data: allCategories } = isSelf
+    ? await supabase
+        .from("community_categories")
+        .select("id, name")
+        .order("sort_order")
+    : { data: null };
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -61,43 +75,48 @@ export default async function MentorProfilePage({
               {mentor.full_name || "Mentor"}
             </h1>
             <div className="mt-2 flex flex-wrap gap-1.5">
-              {(mentor.mentor_profile_categories ?? []).map((t) => {
-                const cat = Array.isArray(t.category)
-                  ? t.category[0]
-                  : t.category;
-                return cat ? (
-                  <Badge key={cat.id} variant="secondary">
-                    {cat.name}
-                  </Badge>
-                ) : null;
-              })}
+              {tags.map((c) => (
+                <Badge key={c.id} variant="secondary">
+                  {c.name}
+                </Badge>
+              ))}
             </div>
             <p className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
               {mentor.bio || "This mentor hasn't added a bio yet."}
             </p>
 
             {!isSelf && (
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-6 space-y-4">
                 <form action={messageUser.bind(null, mentor.id)}>
-                  <Button type="submit" className="w-full sm:w-auto">
+                  <Button type="submit" variant="outline" className="w-full sm:w-auto">
                     <MessagesSquare className="mr-2 size-4" aria-hidden />
                     Message
                   </Button>
                 </form>
-                <Button
-                  variant="outline"
-                  className="w-full sm:w-auto"
-                  disabled
-                  title="Session booking opens once scheduling is configured"
-                >
-                  <CalendarDays className="mr-2 size-4" aria-hidden />
-                  Book a session (coming soon)
-                </Button>
+
+                {mentor.cal_com_username ? (
+                  <BookingEmbed calUsername={mentor.cal_com_username} />
+                ) : (
+                  <p className="flex items-center gap-2 rounded-lg border border-dashed p-3 text-sm text-muted-foreground">
+                    <CalendarDays className="size-4 shrink-0" aria-hidden />
+                    This mentor hasn&apos;t set up session booking yet — send
+                    them a message instead.
+                  </p>
+                )}
               </div>
             )}
           </div>
         </CardContent>
       </Card>
+
+      {isSelf && (
+        <MentorSettings
+          bio={mentor.bio ?? ""}
+          calUsername={mentor.cal_com_username ?? ""}
+          allCategories={allCategories ?? []}
+          activeCategoryIds={tags.map((t) => t.id)}
+        />
+      )}
     </div>
   );
 }

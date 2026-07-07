@@ -1,0 +1,28 @@
+name: Supabase keep-alive
+
+# Prevents the Supabase free-tier project from auto-pausing after
+# 7 days of inactivity by making one trivial DB read per day.
+#
+# Required repository secrets:
+#   SITE_URL     e.g. https://propel.vercel.app  (no trailing slash)
+#   CRON_SECRET  must match the CRON_SECRET env var configured in Vercel
+
+on:
+  schedule:
+    - cron: "17 3 * * *" # daily 03:17 UTC (08:47 IST)
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping keepalive endpoint
+        run: |
+          status=$(curl -s -o /tmp/body -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.SITE_URL }}/api/cron/keepalive")
+          cat /tmp/body
+          if [ "$status" != "200" ]; then
+            echo "Keepalive failed with HTTP $status"
+            exit 1
+          fi

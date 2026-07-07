@@ -38,12 +38,41 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const isProtected =
-    path.startsWith("/dashboard") || path.startsWith("/admin");
+    path.startsWith("/dashboard") ||
+    path.startsWith("/admin") ||
+    path.startsWith("/community") ||
+    path.startsWith("/projects") ||
+    path.startsWith("/mentors") ||
+    path.startsWith("/chat") ||
+    path.startsWith("/sessions");
 
   if (!user && isProtected) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("redirect", path);
+    return NextResponse.redirect(url);
+  }
+
+  // Optimistic admin gate (RLS is the real enforcement; this is UX).
+  if (user && path.startsWith("/admin")) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    if (profile?.role !== "admin") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+  }
+
+  // Signed-in users landing on auth pages go to their dashboard.
+  if (user && (path === "/login" || path === "/register")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    url.search = "";
     return NextResponse.redirect(url);
   }
 

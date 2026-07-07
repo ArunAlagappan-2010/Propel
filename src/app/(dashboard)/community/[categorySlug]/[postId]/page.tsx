@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import { ChevronLeft, Pin } from "lucide-react";
 import { format } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
+import { getSessionProfile } from "@/lib/auth/roles";
 import { CommentForm } from "@/components/community/comment-form";
 import { DeletePostButton } from "@/components/community/delete-post-button";
+import { ModerationControls } from "@/components/community/moderation-controls";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
@@ -19,11 +21,13 @@ export default async function PostPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const session = await getSessionProfile();
+  const isAdmin = session?.profile.role === "admin";
 
   const { data: post } = await supabase
     .from("posts")
     .select(
-      "id, title, body, is_pinned, created_at, author_id, author:profiles!posts_author_id_fkey(full_name, role), category:community_categories(name, slug)"
+      "id, title, body, is_pinned, is_hidden, created_at, author_id, author:profiles!posts_author_id_fkey(full_name, role), category:community_categories(name, slug)"
     )
     .eq("id", postId)
     .single();
@@ -53,6 +57,16 @@ export default async function PostPage({
         <ChevronLeft className="size-4" aria-hidden />
         {category?.name}
       </Link>
+
+      {isAdmin && (
+        <div className="mt-4">
+          <ModerationControls
+            postId={post.id}
+            isPinned={post.is_pinned}
+            isHidden={post.is_hidden}
+          />
+        </div>
+      )}
 
       <article className="mt-4">
         <div className="flex items-start justify-between gap-3">

@@ -10,6 +10,10 @@ import {
   GraduationCap,
   CalendarDays,
   Mail,
+  LayoutDashboard,
+  ClipboardCheck,
+  Database,
+  BarChart3,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -28,6 +32,10 @@ const icons = {
   mentors: GraduationCap,
   sessions: CalendarDays,
   contact: Mail,
+  overview: LayoutDashboard,
+  portfolio: ClipboardCheck,
+  students: Database,
+  statistics: BarChart3,
 } satisfies Record<string, LucideIcon>;
 
 export function DashboardNav({

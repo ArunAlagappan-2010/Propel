@@ -27,7 +27,18 @@ cp .env.example .env.local   # fill in Supabase + Resend keys
 npm run dev
 ```
 
-See [AGENTS.md](AGENTS.md) for project conventions and security invariants.
+## Going live
+
+Follow **[docs/SETUP.md](docs/SETUP.md)** — a step-by-step guide for the
+founders covering Supabase, Resend SMTP, Vercel, Cal.com webhooks, the
+keep-alive cron, first-admin promotion, and an end-to-end verification
+checklist.
+
+Other docs:
+- [docs/data-model.md](docs/data-model.md) — tables, RLS, and deliberate decisions
+- [docs/content-plan.md](docs/content-plan.md) — copy sources + items needing founder review
+- [docs/attribution.md](docs/attribution.md) — third-party licenses
+- [AGENTS.md](AGENTS.md) — project conventions and security invariants
 
 ## Founders
 

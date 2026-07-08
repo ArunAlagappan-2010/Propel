@@ -14,8 +14,8 @@ require a human. Do them in order — later steps depend on earlier ones.
    **in numeric order** (0001 → 0009). Each should say "Success".
 3. Collect the URL and keys (the dashboard reorganized these in 2025 —
    they are no longer on a single "API" page):
-   - **Project Settings → Data API** → "Project URL" →
-     `NEXT_PUBLIC_SUPABASE_URL`
+   - **Project Settings → Data API** → "API URL" (a.k.a. Project URL,
+     `https://YOUR-REF.supabase.co`) → `NEXT_PUBLIC_SUPABASE_URL`
    - **Project Settings → API Keys**:
      - *Legacy API Keys tab* (if present): `anon` `public` key →
        `NEXT_PUBLIC_SUPABASE_ANON_KEY`; `service_role` key →

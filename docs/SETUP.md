@@ -12,11 +12,21 @@ require a human. Do them in order — later steps depend on earlier ones.
    (choose the **Mumbai / South Asia region**).
 2. In **SQL Editor**, paste and run each file from `supabase/migrations/`
    **in numeric order** (0001 → 0009). Each should say "Success".
-3. Collect from **Project Settings → API**:
-   - Project URL → `NEXT_PUBLIC_SUPABASE_URL`
-   - `anon` `public` key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `service_role` key → `SUPABASE_SERVICE_ROLE_KEY` ⚠️ **secret — never
-     expose in the browser or commit it**
+3. Collect the URL and keys (the dashboard reorganized these in 2025 —
+   they are no longer on a single "API" page):
+   - **Project Settings → Data API** → "Project URL" →
+     `NEXT_PUBLIC_SUPABASE_URL`
+   - **Project Settings → API Keys**:
+     - *Legacy API Keys tab* (if present): `anon` `public` key →
+       `NEXT_PUBLIC_SUPABASE_ANON_KEY`; `service_role` key →
+       `SUPABASE_SERVICE_ROLE_KEY`
+     - *New-style keys* (if that's all your project offers): the
+       **Publishable key** (`sb_publishable_…`) →
+       `NEXT_PUBLIC_SUPABASE_ANON_KEY`; create/reveal a **Secret key**
+       (`sb_secret_…`) → `SUPABASE_SERVICE_ROLE_KEY`. Either style works
+       — they're drop-in equivalents.
+   - ⚠️ The service_role/secret key must **never be exposed in the
+     browser or committed to git**.
 4. **Authentication → URL Configuration**: set Site URL to your live URL
    (e.g. `https://propel.vercel.app`) and add
    `https://YOUR-DOMAIN/confirm` to Redirect URLs.
